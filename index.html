@@ -451,6 +451,36 @@
     }
 
     /* Page 4 */
+    .plan-toggle {
+      display: flex;
+      gap: 0.35rem;
+      padding: 0.3rem;
+      margin-bottom: 1.15rem;
+      border-radius: 999px;
+      background: rgba(232, 67, 147, 0.08);
+    }
+
+    .plan-toggle__btn {
+      flex: 1;
+      border: none;
+      border-radius: 999px;
+      padding: 0.68rem 0.45rem;
+      font-family: inherit;
+      font-size: 0.88rem;
+      letter-spacing: 0.04em;
+      color: var(--text-pink);
+      background: transparent;
+      cursor: pointer;
+      transition: background 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .plan-toggle__btn.is-active {
+      background: #fff;
+      color: var(--pink-deep);
+      box-shadow: 0 2px 10px rgba(232, 67, 147, 0.12);
+    }
+
     .menu-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -675,11 +705,15 @@
     <!-- 第四页 -->
     <section class="screen screen-4" id="screen-4">
       <div class="form-card">
-        <div class="page-icon" aria-hidden="true">🍽️</div>
-        <h2 class="form-title">想吃什么呢？</h2>
-        <p class="form-subtitle">选一个你最爱的～</p>
+        <div class="plan-toggle" role="tablist" aria-label="约会类型">
+          <button type="button" class="plan-toggle__btn is-active" data-plan="food" role="tab" aria-selected="true">🍽️ 吃什么</button>
+          <button type="button" class="plan-toggle__btn" data-plan="activity" role="tab" aria-selected="false">🎯 去哪玩</button>
+        </div>
+        <div class="page-icon" id="plan-icon" aria-hidden="true">🍽️</div>
+        <h2 class="form-title" id="plan-title">想吃什么呢？</h2>
+        <p class="form-subtitle" id="plan-subtitle">选一个你最爱的～</p>
         <div class="menu-grid" id="menu-grid"></div>
-        <p class="hint">点击任意美食即可选择 ❤️</p>
+        <p class="hint" id="plan-hint">点击任意美食即可选择 ❤️</p>
       </div>
     </section>
 
@@ -717,10 +751,10 @@
           </div>
         </div>
         <div class="summary-row">
-          <span class="summary-row__icon">🍽️</span>
+          <span class="summary-row__icon" id="summary-plan-icon">🍽️</span>
           <div class="summary-row__body">
-            <div class="summary-row__label">MENU</div>
-            <div class="summary-row__value" id="summary-menu"></div>
+            <div class="summary-row__label" id="summary-plan-label">FOOD</div>
+            <div class="summary-row__value" id="summary-plan-value"></div>
           </div>
         </div>
       </div>
@@ -738,7 +772,7 @@
       var PADDING = 10;
       var NO_TEXTS = ["不要", "再想想嘛", "点不到我", "真的不要吗"];
       var WEEKDAYS = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
-      var MENU_ITEMS = [
+      var FOOD_ITEMS = [
         { id: "hotpot", label: "火锅", icon: "🍲" },
         { id: "bbq", label: "烤肉", icon: "🥩" },
         { id: "sushi", label: "寿司", icon: "🍣" },
@@ -750,7 +784,40 @@
         { id: "thai", label: "泰餐", icon: "🍛" }
       ];
 
-      var state = { date: "", time: "17:00", menu: null };
+      var ACTIVITY_ITEMS = [
+        { id: "movie", label: "看电影", icon: "🎬" },
+        { id: "park", label: "逛公园", icon: "🌳" },
+        { id: "exhibit", label: "看展览", icon: "🖼️" },
+        { id: "amusement", label: "游乐园", icon: "🎡" },
+        { id: "mall", label: "逛商场", icon: "🛍️" },
+        { id: "coffee", label: "喝咖啡", icon: "☕" },
+        { id: "ktv", label: "唱KTV", icon: "🎤" },
+        { id: "seaside", label: "看海/湖", icon: "🌊" },
+        { id: "photo", label: "拍照打卡", icon: "📸" }
+      ];
+
+      var PLAN_MODES = {
+        food: {
+          icon: "🍽️",
+          title: "想吃什么呢？",
+          subtitle: "选一个你最爱的～",
+          hint: "点击任意美食即可选择 ❤️",
+          summaryIcon: "🍽️",
+          summaryLabel: "FOOD",
+          items: FOOD_ITEMS
+        },
+        activity: {
+          icon: "🎯",
+          title: "想去哪里玩？",
+          subtitle: "选一个你最想去的～",
+          hint: "点击任意活动即可选择 ❤️",
+          summaryIcon: "🎯",
+          summaryLabel: "PLAN",
+          items: ACTIVITY_ITEMS
+        }
+      };
+
+      var state = { date: "", time: "17:00", planType: "food", choice: null };
 
       var btnArea = document.getElementById("btn-area");
       var btnAreaInner = document.getElementById("btn-area-inner");
@@ -765,6 +832,10 @@
       var dateFeedback = document.getElementById("date-feedback");
       var timeFeedback = document.getElementById("time-feedback");
       var menuGrid = document.getElementById("menu-grid");
+      var planIcon = document.getElementById("plan-icon");
+      var planTitle = document.getElementById("plan-title");
+      var planSubtitle = document.getElementById("plan-subtitle");
+      var planHint = document.getElementById("plan-hint");
       var exportCanvas = document.getElementById("export-canvas");
 
       function formatDateInput(d) {
@@ -966,12 +1037,40 @@
         showScreen("screen-4");
       });
 
-      function renderMenu() {
+      function getPlanMode(type) {
+        return PLAN_MODES[type || state.planType];
+      }
+
+      function updatePlanHeader() {
+        var mode = getPlanMode();
+        planIcon.textContent = mode.icon;
+        planTitle.textContent = mode.title;
+        planSubtitle.textContent = mode.subtitle;
+        planHint.textContent = mode.hint;
+      }
+
+      function setPlanType(type) {
+        if (state.planType === type) return;
+        state.planType = type;
+        document.querySelectorAll(".plan-toggle__btn").forEach(function (btn) {
+          var active = btn.getAttribute("data-plan") === type;
+          btn.classList.toggle("is-active", active);
+          btn.setAttribute("aria-selected", active ? "true" : "false");
+        });
+        updatePlanHeader();
+        renderPlanGrid();
+      }
+
+      function renderPlanGrid() {
+        var mode = getPlanMode();
         menuGrid.innerHTML = "";
-        MENU_ITEMS.forEach(function (item) {
+        mode.items.forEach(function (item) {
           var btn = document.createElement("button");
           btn.type = "button";
           btn.className = "menu-item";
+          if (state.choice && state.choice.type === state.planType && state.choice.id === item.id) {
+            btn.classList.add("is-selected");
+          }
           btn.innerHTML =
             '<span class="menu-item__check">✓</span>' +
             '<span class="menu-item__icon">' + item.icon + "</span>" +
@@ -982,7 +1081,12 @@
               el.classList.remove("is-selected");
             });
             btn.classList.add("is-selected");
-            state.menu = item;
+            state.choice = {
+              id: item.id,
+              label: item.label,
+              icon: item.icon,
+              type: state.planType
+            };
             setTimeout(function () {
               updateSummary();
               showScreen("screen-5");
@@ -992,6 +1096,12 @@
           menuGrid.appendChild(btn);
         });
       }
+
+      document.querySelectorAll(".plan-toggle__btn").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          setPlanType(btn.getAttribute("data-plan"));
+        });
+      });
 
       function formatSummaryDate(value) {
         if (!value) return "";
@@ -1011,8 +1121,11 @@
       function updateSummary() {
         document.getElementById("summary-date").textContent = formatSummaryDate(state.date);
         document.getElementById("summary-time").textContent = state.time;
-        document.getElementById("summary-menu").textContent =
-          state.menu ? state.menu.icon + " " + state.menu.label : "";
+        var mode = state.choice ? getPlanMode(state.choice.type) : getPlanMode();
+        document.getElementById("summary-plan-icon").textContent = mode.summaryIcon;
+        document.getElementById("summary-plan-label").textContent = mode.summaryLabel;
+        document.getElementById("summary-plan-value").textContent =
+          state.choice ? state.choice.icon + " " + state.choice.label : "";
       }
 
       function roundRect(ctx, x, y, width, height, radius) {
@@ -1087,13 +1200,14 @@
         ctx.font = "44px KaiTi, STKaiti, serif";
         ctx.fillText(state.time, 140, 860);
 
+        var planMode = state.choice ? getPlanMode(state.choice.type) : getPlanMode();
         ctx.fillStyle = "rgba(214,51,132,0.6)";
         ctx.font = "30px KaiTi, STKaiti, serif";
-        ctx.fillText("MENU", 140, 960);
+        ctx.fillText(planMode.summaryLabel, 140, 960);
         ctx.fillStyle = "#d63384";
         ctx.font = "44px KaiTi, STKaiti, serif";
         ctx.fillText(
-          state.menu ? state.menu.icon + " " + state.menu.label : "",
+          state.choice ? state.choice.icon + " " + state.choice.label : "",
           140,
           1030
         );
@@ -1136,7 +1250,8 @@
       document.getElementById("btn-save").addEventListener("click", saveCard);
 
       initDateField();
-      renderMenu();
+      updatePlanHeader();
+      renderPlanGrid();
     })();
   </script>
 </body>
