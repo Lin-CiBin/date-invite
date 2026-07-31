@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>要不要和我一起约会？</title>
+  <style>
+    :root {
+      --pink: #e84393;
+      --pink-deep: #c2185b;
+      --pink-light: #fce4ec;
+      --pink-soft: #fff0f5;
+      --purple-soft: #f3eef8;
+      --purple-mid: #e8dff0;
+      --cream: #fffaf9;
+      --yellow: #ffd54f;
+      --yellow-btn: #ffc107;
+      --text: #5c4a52;
+      --text-pink: #d63384;
+      --move-ms: 360ms;
+      --shadow: rgba(232, 67, 147, 0.15);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html {
+      font-size: 16px;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+      min-height: 100vh;
+      min-height: 100dvh;
+      font-family: "KaiTi", "STKaiti", "楷体", "华文楷体", serif;
+      color: var(--text);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .app {
+      max-width: 420px;
+      margin: 0 auto;
+      min-height: 100dvh;
+    }
+
+    .screen {
+      display: none;
+      min-height: 100dvh;
+      padding: 2.5rem 1.35rem calc(1.75rem + env(safe-area-inset-bottom));
+      animation: screenIn 0.55s ease;
+    }
+
+    .screen.is-active { display: block; }
+
+    @keyframes screenIn {
+      from { opacity: 0; transform: translateY(14px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .screen-1 {
+      background: linear-gradient(180deg, #fff8fa 0%, #fce8f0 55%, #f8dfe8 100%);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding-top: 3.5rem;
+    }
+
+    .screen-1.is-active { display: flex; }
+
+    .heart-hero {
+      position: relative;
+      width: 88px;
+      height: 88px;
+      margin-bottom: 1.5rem;
+    }
+
+    .heart-hero__svg {
+      width: 100%;
+      height: 100%;
+      filter: drop-shadow(0 6px 16px rgba(232, 67, 147, 0.25));
+    }
+
+    .heart-hero__sparkle {
+      position: absolute;
+      font-size: 1rem;
+      color: var(--yellow);
+      animation: sparkle 2s ease-in-out infinite;
+    }
+
+    .heart-hero__sparkle--tl { top: -4px; left: -2px; }
+    .heart-hero__sparkle--tr { top: 2px; right: -6px; animation-delay: 0.6s; }
+
+    @keyframes sparkle {
+      0%, 100% { opacity: 0.6; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.15); }
+    }
+
+    .page-title {
+      font-size: clamp(1.45rem, 6vw, 1.75rem);
+      color: var(--text-pink);
+      letter-spacing: 0.06em;
+      line-height: 1.5;
+      margin-bottom: 0.6rem;
+    }
+
+    .page-subtitle {
+      font-size: 1rem;
+      color: var(--pink);
+      letter-spacing: 0.08em;
+      margin-bottom: 2rem;
+    }
+
+    .btn-area {
+      position: relative;
+      width: 100%;
+      height: 150px;
+      margin-top: 0.5rem;
+      overflow: hidden;
+    }
+
+    .btn-area__inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+
+    .btn {
+      appearance: none;
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
+      letter-spacing: 0.08em;
+      white-space: nowrap;
+      -webkit-tap-highlight-color: transparent;
+      transition:
+        left var(--move-ms) ease,
+        top var(--move-ms) ease,
+        transform var(--move-ms) ease,
+        background-color 0.2s ease,
+        box-shadow 0.2s ease;
+    }
+
+    .btn:active { transform: scale(0.97); }
+
+    .btn--yes {
+      background: linear-gradient(135deg, #f06292, #e84393);
+      color: #fff;
+      font-size: 1.05rem;
+      padding: 0.9rem 2rem;
+      border-radius: 999px;
+      box-shadow: 0 6px 20px var(--shadow);
+      min-width: 140px;
+    }
+
+    .btn-area.is-escaped .btn--yes:active {
+      transform: translate(-50%, -50%) scale(0.97);
+    }
+
+    .btn--no {
+      background: rgba(255, 255, 255, 0.85);
+      color: var(--text-pink);
+      font-size: 0.88rem;
+      padding: 0.55rem 1rem;
+      border-radius: 999px;
+      border: 1px solid rgba(232, 67, 147, 0.25);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    .btn-area:not(.is-escaped) .btn-area__inner {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+    }
+
+    .btn-area:not(.is-escaped) .btn--yes { flex: 0 1 auto; }
+    .btn-area:not(.is-escaped) .btn--no { flex: 0 1 auto; }
+
+    .btn-area.is-escaped .btn-area__inner {
+      height: 100%;
+      position: relative;
+    }
+
+    .btn-area.is-escaped .btn {
+      position: absolute;
+      flex: none;
+    }
+
+    .btn-area.is-escaped .btn--yes {
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 10;
+    }
+
+    .page-hint {
+      margin-top: auto;
+      padding-top: 2rem;
+      font-size: 0.82rem;
+      color: rgba(214, 51, 132, 0.45);
+      letter-spacing: 0.06em;
+    }
+
+    /* Page 2 */
+    .screen-2 {
+      background: linear-gradient(180deg, #faf8fc 0%, #ede4f4 45%, #e5d8ef 100%);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      gap: 0.75rem;
+      padding-top: 10vh;
+    }
+
+    .screen-2.is-active { display: flex; }
+
+    .emoji-wrap {
+      position: relative;
+      margin-bottom: 0.5rem;
+    }
+
+    .emoji-large {
+      font-size: 5rem;
+      line-height: 1;
+      animation: emojiPop 0.55s ease;
+    }
+
+    .emoji-heart {
+      position: absolute;
+      font-size: 1.1rem;
+      animation: floatHeart 2.5s ease-in-out infinite;
+    }
+
+    .emoji-heart--1 { top: 0; left: -18px; }
+    .emoji-heart--2 { top: 8px; right: -20px; animation-delay: 0.4s; }
+    .emoji-heart--3 { bottom: 10px; left: -10px; animation-delay: 0.8s; }
+    .emoji-heart--4 { bottom: 0; right: -14px; animation-delay: 1.2s; }
+
+    @keyframes emojiPop {
+      0% { transform: scale(0.5); opacity: 0; }
+      70% { transform: scale(1.06); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    @keyframes floatHeart {
+      0%, 100% { transform: translateY(0); opacity: 0.85; }
+      50% { transform: translateY(-6px); opacity: 1; }
+    }
+
+    .confirm-title {
+      font-size: 1.6rem;
+      color: var(--text-pink);
+      letter-spacing: 0.1em;
+    }
+
+    .confirm-text {
+      font-size: 1.1rem;
+      color: var(--pink);
+      letter-spacing: 0.08em;
+      line-height: 1.7;
+    }
+
+    .confirm-sub {
+      font-size: 0.95rem;
+      color: rgba(214, 51, 132, 0.75);
+      letter-spacing: 0.06em;
+      margin: 0.25rem 0 1.25rem;
+    }
+
+    .btn--pill {
+      background: linear-gradient(135deg, #f06292, #e84393);
+      color: #fff;
+      font-size: 1rem;
+      padding: 0.85rem 2.5rem;
+      border-radius: 999px;
+      box-shadow: 0 6px 20px var(--shadow);
+      min-width: 180px;
+    }
+
+    /* Page 3 & 4 shared */
+    .screen-3,
+    .screen-4,
+    .screen-5 {
+      background: linear-gradient(180deg, #fff5f8 0%, #fce4ec 100%);
+    }
+
+    .screen-3.is-active,
+    .screen-4.is-active {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 2rem;
+      gap: 1rem;
+    }
+
+    .form-card {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.72);
+      backdrop-filter: blur(8px);
+      border-radius: 20px;
+      padding: 1.75rem 1.35rem 1.5rem;
+      box-shadow: 0 8px 32px rgba(232, 67, 147, 0.08);
+    }
+
+    .page-icon {
+      font-size: 2.2rem;
+      text-align: center;
+      margin-bottom: 0.75rem;
+      line-height: 1;
+    }
+
+    .form-title {
+      text-align: center;
+      font-size: 1.35rem;
+      color: var(--text-pink);
+      letter-spacing: 0.08em;
+      margin-bottom: 0.35rem;
+    }
+
+    .form-subtitle {
+      text-align: center;
+      font-size: 0.9rem;
+      color: rgba(214, 51, 132, 0.65);
+      letter-spacing: 0.06em;
+      margin-bottom: 1.5rem;
+    }
+
+    .field {
+      margin-bottom: 1.1rem;
+    }
+
+    .field label {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.92rem;
+      color: var(--text-pink);
+      letter-spacing: 0.06em;
+      margin-bottom: 0.45rem;
+    }
+
+    .field-input-wrap {
+      position: relative;
+    }
+
+    .field input {
+      width: 100%;
+      padding: 0.85rem 2.5rem 0.85rem 1rem;
+      border: 1px solid rgba(232, 67, 147, 0.18);
+      border-radius: 12px;
+      background: #fff;
+      font-family: inherit;
+      font-size: 1rem;
+      color: var(--text);
+    }
+
+    .field input:focus {
+      outline: none;
+      border-color: var(--pink);
+      box-shadow: 0 0 0 3px rgba(232, 67, 147, 0.1);
+    }
+
+    .field-input-icon {
+      position: absolute;
+      right: 0.85rem;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 1rem;
+      pointer-events: none;
+      opacity: 0.45;
+    }
+
+    .field-feedback {
+      margin-top: 0.35rem;
+      font-size: 0.78rem;
+      color: var(--pink);
+      letter-spacing: 0.04em;
+      min-height: 1.1rem;
+    }
+
+    .btn--confirm {
+      width: 100%;
+      margin-top: 0.5rem;
+      background: linear-gradient(135deg, #f06292, #e84393);
+      color: #fff;
+      font-size: 1rem;
+      padding: 0.9rem;
+      border-radius: 999px;
+      box-shadow: 0 6px 20px var(--shadow);
+    }
+
+    /* Page 4 */
+    .menu-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.65rem;
+      width: 100%;
+    }
+
+    .menu-item {
+      aspect-ratio: 1;
+      border: none;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.3rem;
+      cursor: pointer;
+      position: relative;
+      font-family: inherit;
+      font-size: 0.88rem;
+      letter-spacing: 0.04em;
+      color: var(--text);
+      transition: background 0.25s ease, transform 0.2s ease, color 0.25s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .menu-item:active { transform: scale(0.96); }
+
+    .menu-item.is-selected {
+      background: linear-gradient(135deg, #f06292, #e84393);
+      color: #fff;
+      transform: scale(1.02);
+    }
+
+    .menu-item__icon { font-size: 1.75rem; line-height: 1; }
+
+    .menu-item__check {
+      position: absolute;
+      top: 6px;
+      right: 8px;
+      font-size: 0.8rem;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+
+    .menu-item.is-selected .menu-item__check { opacity: 1; }
+
+    .hint {
+      font-size: 0.78rem;
+      color: rgba(214, 51, 132, 0.5);
+      text-align: center;
+      letter-spacing: 0.06em;
+      margin-top: 0.5rem;
+    }
+
+    /* Page 5 */
+    .screen-5.is-active {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 1.75rem;
+      gap: 0.75rem;
+    }
+
+    .heart-wrap {
+      position: relative;
+      margin-bottom: 0.25rem;
+    }
+
+    .heart-big {
+      width: 96px;
+      height: 96px;
+      filter: drop-shadow(0 8px 20px rgba(232, 67, 147, 0.3));
+    }
+
+    .heart-small {
+      position: absolute;
+      bottom: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 1.4rem;
+    }
+
+    .summary-title {
+      font-size: 1.35rem;
+      color: var(--text-pink);
+      letter-spacing: 0.08em;
+    }
+
+    .summary-sub {
+      font-size: 0.92rem;
+      color: var(--pink);
+      letter-spacing: 0.06em;
+      margin-bottom: 0.5rem;
+    }
+
+    .summary-card {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.65);
+      backdrop-filter: blur(10px);
+      border-radius: 18px;
+      padding: 1.25rem 1.1rem;
+      box-shadow: 0 8px 28px rgba(232, 67, 147, 0.1);
+    }
+
+    .summary-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.65rem;
+      padding: 0.65rem 0;
+      border-bottom: 1px solid rgba(232, 67, 147, 0.08);
+    }
+
+    .summary-row:last-child { border-bottom: none; }
+
+    .summary-row__icon { font-size: 1.2rem; line-height: 1.4; }
+
+    .summary-row__body { flex: 1; }
+
+    .summary-row__label {
+      font-size: 0.72rem;
+      color: rgba(214, 51, 132, 0.55);
+      letter-spacing: 0.12em;
+      margin-bottom: 0.15rem;
+    }
+
+    .summary-row__value {
+      font-size: 1.05rem;
+      color: var(--text-pink);
+      letter-spacing: 0.04em;
+    }
+
+    .btn--yellow {
+      width: 100%;
+      margin-top: 0.75rem;
+      background: linear-gradient(135deg, #ffe082, var(--yellow-btn));
+      color: #5c4a00;
+      font-size: 1rem;
+      padding: 0.9rem;
+      border-radius: 999px;
+      box-shadow: 0 6px 18px rgba(255, 193, 7, 0.35);
+    }
+
+    canvas { display: none; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- 第一页 -->
+    <section class="screen screen-1 is-active" id="screen-1">
+      <div class="heart-hero">
+        <svg class="heart-hero__svg" viewBox="0 0 100 90" aria-hidden="true">
+          <defs>
+            <linearGradient id="heartGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#f48fb1"/>
+              <stop offset="100%" stop-color="#e84393"/>
+            </linearGradient>
+          </defs>
+          <path fill="url(#heartGrad)" d="M50 82 C20 58 2 42 2 24 C2 10 14 2 26 2 C36 2 44 8 50 16 C56 8 64 2 74 2 C86 2 98 10 98 24 C98 42 80 58 50 82Z"/>
+        </svg>
+        <span class="heart-hero__sparkle heart-hero__sparkle--tl">✦</span>
+        <span class="heart-hero__sparkle heart-hero__sparkle--tr">✦</span>
+      </div>
+
+      <h1 class="page-title">要不要和我一起约会？</h1>
+      <p class="page-subtitle">认真考虑一下哦~ 💕</p>
+
+      <div class="btn-area" id="btn-area">
+        <div class="btn-area__inner" id="btn-area-inner">
+          <button class="btn btn--yes" type="button" id="btn-yes">♥ 愿意</button>
+          <button class="btn btn--no" type="button" id="btn-no">不要</button>
+        </div>
+      </div>
+
+      <p class="page-hint">✨ 点一下试试看~</p>
+    </section>
+
+    <!-- 第二页 -->
+    <section class="screen screen-2" id="screen-2">
+      <div class="emoji-wrap">
+        <span class="emoji-heart emoji-heart--1">💕</span>
+        <span class="emoji-heart emoji-heart--2">💕</span>
+        <span class="emoji-heart emoji-heart--3">💕</span>
+        <span class="emoji-heart emoji-heart--4">💕</span>
+        <div class="emoji-large" aria-hidden="true">😊</div>
+      </div>
+      <h2 class="confirm-title">太好了！</h2>
+      <p class="confirm-text">我就知道你会愿意～</p>
+      <p class="confirm-sub">✨ 让我们一起规划美好的约会吧 ✨</p>
+      <button class="btn btn--pill" type="button" id="btn-to-date">继续</button>
+    </section>
+
+    <!-- 第三页 -->
+    <section class="screen screen-3" id="screen-3">
+      <div class="form-card">
+        <div class="page-icon" aria-hidden="true">📅</div>
+        <h2 class="form-title">选个好日子吧</h2>
+        <p class="form-subtitle">什么时候有空呢～</p>
+
+        <div class="field">
+          <label for="date-input"><span>📅</span> 日期</label>
+          <div class="field-input-wrap">
+            <input type="date" id="date-input">
+            <span class="field-input-icon">📅</span>
+          </div>
+          <p class="field-feedback" id="date-feedback"></p>
+        </div>
+
+        <div class="field">
+          <label for="time-input"><span>🕐</span> 时间</label>
+          <div class="field-input-wrap">
+            <input type="time" id="time-input" value="17:00">
+            <span class="field-input-icon">🕐</span>
+          </div>
+          <p class="field-feedback" id="time-feedback"></p>
+        </div>
+
+        <button class="btn btn--confirm" type="button" id="btn-to-menu">✓ 确认</button>
+      </div>
+    </section>
+
+    <!-- 第四页 -->
+    <section class="screen screen-4" id="screen-4">
+      <div class="form-card">
+        <div class="page-icon" aria-hidden="true">🍽️</div>
+        <h2 class="form-title">想吃什么呢？</h2>
+        <p class="form-subtitle">选一个你最爱的～</p>
+        <div class="menu-grid" id="menu-grid"></div>
+        <p class="hint">点击任意美食即可选择 ❤️</p>
+      </div>
+    </section>
+
+    <!-- 第五页 -->
+    <section class="screen screen-5" id="screen-5">
+      <div class="heart-wrap">
+        <svg class="heart-big" viewBox="0 0 100 90" aria-hidden="true">
+          <defs>
+            <linearGradient id="heartGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#f48fb1"/>
+              <stop offset="100%" stop-color="#e84393"/>
+            </linearGradient>
+          </defs>
+          <path fill="url(#heartGrad2)" d="M50 82 C20 58 2 42 2 24 C2 10 14 2 26 2 C36 2 44 8 50 16 C56 8 64 2 74 2 C86 2 98 10 98 24 C98 42 80 58 50 82Z"/>
+        </svg>
+        <span class="heart-small">💕</span>
+      </div>
+
+      <h2 class="summary-title">约会约定好了哦！</h2>
+      <p class="summary-sub">期待与你相见 💕</p>
+
+      <div class="summary-card">
+        <div class="summary-row">
+          <span class="summary-row__icon">📅</span>
+          <div class="summary-row__body">
+            <div class="summary-row__label">DATE</div>
+            <div class="summary-row__value" id="summary-date"></div>
+          </div>
+        </div>
+        <div class="summary-row">
+          <span class="summary-row__icon">⏰</span>
+          <div class="summary-row__body">
+            <div class="summary-row__label">TIME</div>
+            <div class="summary-row__value" id="summary-time"></div>
+          </div>
+        </div>
+        <div class="summary-row">
+          <span class="summary-row__icon">🍽️</span>
+          <div class="summary-row__body">
+            <div class="summary-row__label">MENU</div>
+            <div class="summary-row__value" id="summary-menu"></div>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn btn--yellow" type="button" id="btn-save">保存约会卡片</button>
+      <p class="hint">生成 1080×1440 图片，可分享或下载</p>
+    </section>
+  </div>
+
+  <canvas id="export-canvas" width="1080" height="1440"></canvas>
+
+  <script>
+    (function () {
+      var MOVE_MS = 360;
+      var PADDING = 10;
+      var NO_TEXTS = ["不要", "再想想嘛", "点不到我", "真的不要吗"];
+      var WEEKDAYS = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
+      var MENU_ITEMS = [
+        { id: "hotpot", label: "火锅", icon: "🍲" },
+        { id: "bbq", label: "烤肉", icon: "🥩" },
+        { id: "sushi", label: "寿司", icon: "🍣" },
+        { id: "pasta", label: "意面", icon: "🍝" },
+        { id: "pizza", label: "披萨", icon: "🍕" },
+        { id: "salad", label: "沙拉", icon: "🥗" },
+        { id: "ramen", label: "拉面", icon: "🍜" },
+        { id: "bento", label: "便当", icon: "🍱" },
+        { id: "thai", label: "泰餐", icon: "🍛" }
+      ];
+
+      var state = { date: "", time: "17:00", menu: null };
+
+      var btnArea = document.getElementById("btn-area");
+      var btnAreaInner = document.getElementById("btn-area-inner");
+      var btnYes = document.getElementById("btn-yes");
+      var btnNo = document.getElementById("btn-no");
+      var escaped = false;
+      var noTextIndex = 0;
+      var currentCorner = -1;
+
+      var dateInput = document.getElementById("date-input");
+      var timeInput = document.getElementById("time-input");
+      var dateFeedback = document.getElementById("date-feedback");
+      var timeFeedback = document.getElementById("time-feedback");
+      var menuGrid = document.getElementById("menu-grid");
+      var exportCanvas = document.getElementById("export-canvas");
+
+      function formatDateInput(d) {
+        var y = d.getFullYear();
+        var m = String(d.getMonth() + 1).padStart(2, "0");
+        var day = String(d.getDate()).padStart(2, "0");
+        return y + "-" + m + "-" + day;
+      }
+
+      function parseDate(value) {
+        var p = value.split("-");
+        return new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
+      }
+
+      function tomorrow() {
+        var d = new Date();
+        d.setDate(d.getDate() + 1);
+        d.setHours(0, 0, 0, 0);
+        return d;
+      }
+
+      function updateDateFeedback() {
+        if (!dateInput.value) {
+          dateFeedback.textContent = "";
+          return;
+        }
+        var d = parseDate(dateInput.value);
+        dateFeedback.textContent =
+          "已选：" + (d.getMonth() + 1) + "月" + d.getDate() + "日 " + WEEKDAYS[d.getDay()];
+      }
+
+      function updateTimeFeedback() {
+        timeFeedback.textContent = timeInput.value ? "已选：" + timeInput.value : "";
+      }
+
+      function initDateField() {
+        var tmr = tomorrow();
+        var todayStr = formatDateInput(new Date());
+        dateInput.min = todayStr;
+        dateInput.value = formatDateInput(tmr);
+        state.date = dateInput.value;
+        updateDateFeedback();
+        updateTimeFeedback();
+      }
+
+      function showScreen(id) {
+        document.querySelectorAll(".screen").forEach(function (el) {
+          el.classList.remove("is-active");
+        });
+        document.getElementById(id).classList.add("is-active");
+      }
+
+      function getCorners(areaW, areaH, btnW, btnH) {
+        return [
+          { x: PADDING, y: PADDING, index: 0 },
+          { x: areaW - btnW - PADDING, y: PADDING, index: 1 },
+          { x: PADDING, y: areaH - btnH - PADDING, index: 2 },
+          { x: areaW - btnW - PADDING, y: areaH - btnH - PADDING, index: 3 }
+        ];
+      }
+
+      function overlapsCenter(corner, btnW, btnH, areaW, areaH, yesW, yesH) {
+        var cx = areaW / 2;
+        var cy = areaH / 2;
+        var yesLeft = cx - yesW / 2 - 10;
+        var yesTop = cy - yesH / 2 - 10;
+        var yesRight = cx + yesW / 2 + 10;
+        var yesBottom = cy + yesH / 2 + 10;
+        return !(
+          corner.x + btnW < yesLeft ||
+          corner.x > yesRight ||
+          corner.y + btnH < yesTop ||
+          corner.y > yesBottom
+        );
+      }
+
+      var OPPOSITE_CORNER = { 0: 3, 1: 2, 2: 1, 3: 0 };
+
+      function getValidCorners(areaW, areaH, btnW, btnH, yesW, yesH) {
+        var all = getCorners(areaW, areaH, btnW, btnH);
+        var valid = all.filter(function (c) {
+          return !overlapsCenter(c, btnW, btnH, areaW, areaH, yesW, yesH);
+        });
+        return valid.length ? valid : all;
+      }
+
+      function pickNextCorner(validCorners) {
+        if (currentCorner < 0) return validCorners[0];
+        var preferred = OPPOSITE_CORNER[currentCorner];
+        for (var i = 0; i < validCorners.length; i++) {
+          if (validCorners[i].index === preferred) return validCorners[i];
+        }
+        for (var j = 0; j < validCorners.length; j++) {
+          if (validCorners[j].index !== currentCorner) return validCorners[j];
+        }
+        return validCorners[0];
+      }
+
+      function applyNoPosition(x, y, animate) {
+        btnNo.style.transition = animate
+          ? "left " + MOVE_MS + "ms ease, top " + MOVE_MS + "ms ease"
+          : "none";
+        btnNo.style.left = x + "px";
+        btnNo.style.top = y + "px";
+        btnNo.style.transform = "none";
+      }
+
+      function applyYesCenter(animate) {
+        btnYes.style.transition = animate
+          ? "left " + MOVE_MS + "ms ease, top " + MOVE_MS + "ms ease, transform " + MOVE_MS + "ms ease"
+          : "none";
+        btnYes.style.left = "50%";
+        btnYes.style.top = "50%";
+        btnYes.style.transform = "translate(-50%, -50%)";
+        btnYes.style.zIndex = "10";
+      }
+
+      function moveNoToCorner(animate) {
+        var areaRect = btnAreaInner.getBoundingClientRect();
+        var noRect = btnNo.getBoundingClientRect();
+        var yesRect = btnYes.getBoundingClientRect();
+        var target = pickNextCorner(getValidCorners(
+          areaRect.width, areaRect.height,
+          noRect.width, noRect.height,
+          yesRect.width, yesRect.height
+        ));
+        currentCorner = target.index;
+        applyNoPosition(target.x, target.y, animate);
+      }
+
+      function activateEscapeMode() {
+        if (escaped) return;
+
+        var areaRect = btnAreaInner.getBoundingClientRect();
+        var yesRect = btnYes.getBoundingClientRect();
+        var noRect = btnNo.getBoundingClientRect();
+
+        btnArea.style.height = btnArea.getBoundingClientRect().height + "px";
+        btnArea.classList.add("is-escaped");
+
+        btnYes.style.position = "absolute";
+        btnNo.style.position = "absolute";
+
+        btnYes.style.left = (yesRect.left - areaRect.left) + "px";
+        btnYes.style.top = (yesRect.top - areaRect.top) + "px";
+        btnYes.style.transform = "none";
+        btnYes.style.zIndex = "5";
+
+        btnNo.style.left = (noRect.left - areaRect.left) + "px";
+        btnNo.style.top = (noRect.top - areaRect.top) + "px";
+        btnNo.style.transform = "none";
+        btnNo.style.zIndex = "4";
+
+        escaped = true;
+
+        requestAnimationFrame(function () {
+          requestAnimationFrame(function () {
+            applyYesCenter(true);
+            moveNoToCorner(true);
+          });
+        });
+      }
+
+      function onNoClick(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!escaped) {
+          activateEscapeMode();
+          return;
+        }
+        noTextIndex = (noTextIndex + 1) % NO_TEXTS.length;
+        btnNo.textContent = NO_TEXTS[noTextIndex];
+        requestAnimationFrame(function () { moveNoToCorner(true); });
+      }
+
+      function onResize() {
+        if (!escaped) return;
+        applyYesCenter(false);
+        moveNoToCorner(false);
+      }
+
+      btnYes.addEventListener("click", function () { showScreen("screen-2"); });
+      btnNo.addEventListener("click", onNoClick);
+      window.addEventListener("resize", onResize);
+
+      dateInput.addEventListener("change", updateDateFeedback);
+      timeInput.addEventListener("change", updateTimeFeedback);
+
+      document.getElementById("btn-to-date").addEventListener("click", function () {
+        showScreen("screen-3");
+      });
+
+      document.getElementById("btn-to-menu").addEventListener("click", function () {
+        if (dateInput.value < dateInput.min) dateInput.value = dateInput.min;
+        state.date = dateInput.value;
+        state.time = timeInput.value || "17:00";
+        updateDateFeedback();
+        updateTimeFeedback();
+        showScreen("screen-4");
+      });
+
+      function renderMenu() {
+        menuGrid.innerHTML = "";
+        MENU_ITEMS.forEach(function (item) {
+          var btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "menu-item";
+          btn.innerHTML =
+            '<span class="menu-item__check">✓</span>' +
+            '<span class="menu-item__icon">' + item.icon + "</span>" +
+            "<span>" + item.label + "</span>";
+
+          btn.addEventListener("click", function () {
+            document.querySelectorAll(".menu-item").forEach(function (el) {
+              el.classList.remove("is-selected");
+            });
+            btn.classList.add("is-selected");
+            state.menu = item;
+            setTimeout(function () {
+              updateSummary();
+              showScreen("screen-5");
+            }, 280);
+          });
+
+          menuGrid.appendChild(btn);
+        });
+      }
+
+      function formatSummaryDate(value) {
+        if (!value) return "";
+        var d = parseDate(value);
+        var y = d.getFullYear();
+        var m = String(d.getMonth() + 1).padStart(2, "0");
+        var day = String(d.getDate()).padStart(2, "0");
+        return y + "." + m + "." + day + " " + WEEKDAYS[d.getDay()];
+      }
+
+      function formatDisplayDate(value) {
+        if (!value) return "";
+        var d = parseDate(value);
+        return d.getFullYear() + "年" + (d.getMonth() + 1) + "月" + d.getDate() + "日";
+      }
+
+      function updateSummary() {
+        document.getElementById("summary-date").textContent = formatSummaryDate(state.date);
+        document.getElementById("summary-time").textContent = state.time;
+        document.getElementById("summary-menu").textContent =
+          state.menu ? state.menu.icon + " " + state.menu.label : "";
+      }
+
+      function roundRect(ctx, x, y, width, height, radius) {
+        ctx.beginPath();
+        ctx.moveTo(x + radius, y);
+        ctx.lineTo(x + width - radius, y);
+        ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+        ctx.lineTo(x + width, y + height - radius);
+        ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+        ctx.lineTo(x + radius, y + height);
+        ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+        ctx.lineTo(x, y + radius);
+        ctx.quadraticCurveTo(x, y, x + radius, y);
+        ctx.closePath();
+      }
+
+      function drawHeart(ctx, cx, cy, size) {
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.scale(size / 100, size / 100);
+        ctx.fillStyle = "#e84393";
+        ctx.beginPath();
+        ctx.moveTo(0, 18);
+        ctx.bezierCurveTo(-30, -12, -48, -28, -48, -46);
+        ctx.bezierCurveTo(-48, -60, -36, -68, -24, -68);
+        ctx.bezierCurveTo(-14, -68, -6, -62, 0, -54);
+        ctx.bezierCurveTo(6, -62, 14, -68, 24, -68);
+        ctx.bezierCurveTo(36, -68, 48, -60, 48, -46);
+        ctx.bezierCurveTo(48, -28, 30, -12, 0, 18);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      function drawCard() {
+        var ctx = exportCanvas.getContext("2d");
+        var w = 1080;
+        var h = 1440;
+
+        var grad = ctx.createLinearGradient(0, 0, 0, h);
+        grad.addColorStop(0, "#fff5f8");
+        grad.addColorStop(1, "#fce4ec");
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, w, h);
+
+        drawHeart(ctx, w / 2, 220, 160);
+
+        ctx.textAlign = "center";
+        ctx.fillStyle = "#d63384";
+        ctx.font = "52px KaiTi, STKaiti, serif";
+        ctx.fillText("约会约定好了哦！", w / 2, 380);
+
+        ctx.fillStyle = "#e84393";
+        ctx.font = "36px KaiTi, STKaiti, serif";
+        ctx.fillText("期待与你相见", w / 2, 450);
+
+        ctx.fillStyle = "rgba(255,255,255,0.75)";
+        roundRect(ctx, 80, 520, w - 160, 620, 28);
+        ctx.fill();
+
+        ctx.textAlign = "left";
+        ctx.fillStyle = "rgba(214,51,132,0.6)";
+        ctx.font = "30px KaiTi, STKaiti, serif";
+        ctx.fillText("DATE", 140, 620);
+        ctx.fillStyle = "#d63384";
+        ctx.font = "44px KaiTi, STKaiti, serif";
+        ctx.fillText(formatSummaryDate(state.date), 140, 690);
+
+        ctx.fillStyle = "rgba(214,51,132,0.6)";
+        ctx.font = "30px KaiTi, STKaiti, serif";
+        ctx.fillText("TIME", 140, 790);
+        ctx.fillStyle = "#d63384";
+        ctx.font = "44px KaiTi, STKaiti, serif";
+        ctx.fillText(state.time, 140, 860);
+
+        ctx.fillStyle = "rgba(214,51,132,0.6)";
+        ctx.font = "30px KaiTi, STKaiti, serif";
+        ctx.fillText("MENU", 140, 960);
+        ctx.fillStyle = "#d63384";
+        ctx.font = "44px KaiTi, STKaiti, serif";
+        ctx.fillText(
+          state.menu ? state.menu.icon + " " + state.menu.label : "",
+          140,
+          1030
+        );
+
+        ctx.fillStyle = "#ffc107";
+        roundRect(ctx, 140, 1220, w - 280, 90, 45);
+        ctx.fill();
+        ctx.textAlign = "center";
+        ctx.fillStyle = "#5c4a00";
+        ctx.font = "38px KaiTi, STKaiti, serif";
+        ctx.fillText("保存约会卡片", w / 2, 1278);
+      }
+
+      function saveCard() {
+        drawCard();
+        exportCanvas.toBlob(function (blob) {
+          if (!blob) return;
+          var file = new File([blob], "date-invite.png", { type: "image/png" });
+          if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            navigator.share({
+              files: [file],
+              title: "约会约定",
+              text: "我们的约会安排"
+            }).catch(function () { downloadBlob(blob); });
+          } else {
+            downloadBlob(blob);
+          }
+        }, "image/png");
+      }
+
+      function downloadBlob(blob) {
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement("a");
+        a.href = url;
+        a.download = "date-invite.png";
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+
+      document.getElementById("btn-save").addEventListener("click", saveCard);
+
+      initDateField();
+      renderMenu();
+    })();
+  </script>
+</body>
+</html>
