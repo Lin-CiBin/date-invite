@@ -352,50 +352,48 @@
       min-width: 0;
     }
 
-    .picker-row {
-      display: flex;
-      align-items: center;
-      gap: 0.45rem;
+    .field input {
+      display: block;
       width: 100%;
+      max-width: 100%;
       min-width: 0;
-    }
-
-    .picker-row--time {
-      gap: 0.35rem;
-    }
-
-    .picker-select {
-      flex: 1 1 0;
-      min-width: 0;
-      width: 0;
-      padding: 0.85rem 1.65rem 0.85rem 0.65rem;
+      padding: 0.85rem 1rem;
       border: 1px solid rgba(232, 67, 147, 0.18);
       border-radius: 12px;
-      background-color: #fff;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23d63384' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 0.55rem center;
-      background-size: 0.65rem;
+      background: #fff;
       font-family: inherit;
-      font-size: 0.95rem;
+      font-size: 1rem;
       color: var(--text);
-      text-align: center;
-      -webkit-appearance: none;
-      appearance: none;
+      text-align: left;
     }
 
-    .picker-select:focus {
+    .field input[type="date"],
+    .field input[type="time"] {
+      min-height: 3rem;
+      padding-right: 0.5rem;
+      line-height: 1.4;
+    }
+
+    .field input[type="date"]::-webkit-date-and-time-value,
+    .field input[type="time"]::-webkit-date-and-time-value {
+      text-align: left;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .field input[type="date"]::-webkit-calendar-picker-indicator,
+    .field input[type="time"]::-webkit-calendar-picker-indicator {
+      opacity: 0.55;
+      cursor: pointer;
+      padding: 0.25rem;
+      margin-left: 0.25rem;
+    }
+
+    .field input:focus {
       outline: none;
       border-color: var(--pink);
       box-shadow: 0 0 0 3px rgba(232, 67, 147, 0.1);
-    }
-
-    .picker-sep {
-      flex: 0 0 auto;
-      font-size: 1.05rem;
-      color: var(--text-pink);
-      line-height: 1;
-      user-select: none;
     }
 
     .field-feedback {
@@ -620,21 +618,17 @@
         <p class="form-subtitle">什么时候有空呢～</p>
 
         <div class="field">
-          <label for="date-year"><span>📅</span> 日期</label>
-          <div class="picker-row" id="date-picker">
-            <select class="picker-select" id="date-year" aria-label="年"></select>
-            <select class="picker-select" id="date-month" aria-label="月"></select>
-            <select class="picker-select" id="date-day" aria-label="日"></select>
+          <label for="date-input"><span>📅</span> 日期</label>
+          <div class="field-input-wrap">
+            <input type="date" id="date-input">
           </div>
           <p class="field-feedback" id="date-feedback"></p>
         </div>
 
         <div class="field">
-          <label for="time-hour"><span>🕐</span> 时间</label>
-          <div class="picker-row picker-row--time" id="time-picker">
-            <select class="picker-select" id="time-hour" aria-label="时"></select>
-            <span class="picker-sep" aria-hidden="true">:</span>
-            <select class="picker-select" id="time-minute" aria-label="分"></select>
+          <label for="time-input"><span>🕐</span> 时间</label>
+          <div class="field-input-wrap">
+            <input type="time" id="time-input" value="17:00">
           </div>
           <p class="field-feedback" id="time-feedback"></p>
         </div>
@@ -731,11 +725,8 @@
       var noTextIndex = 0;
       var currentCorner = -1;
 
-      var dateYear = document.getElementById("date-year");
-      var dateMonth = document.getElementById("date-month");
-      var dateDay = document.getElementById("date-day");
-      var timeHour = document.getElementById("time-hour");
-      var timeMinute = document.getElementById("time-minute");
+      var dateInput = document.getElementById("date-input");
+      var timeInput = document.getElementById("time-input");
       var dateFeedback = document.getElementById("date-feedback");
       var timeFeedback = document.getElementById("time-feedback");
       var menuGrid = document.getElementById("menu-grid");
@@ -760,127 +751,26 @@
         return d;
       }
 
-      function getDateValue() {
-        return dateYear.value + "-" + dateMonth.value + "-" + dateDay.value;
-      }
-
-      function getTimeValue() {
-        return timeHour.value + ":" + timeMinute.value;
-      }
-
-      function daysInMonth(year, month) {
-        return new Date(year, month, 0).getDate();
-      }
-
-      function populateYears() {
-        var startYear = new Date().getFullYear();
-        dateYear.innerHTML = "";
-        for (var i = 0; i < 2; i++) {
-          var year = startYear + i;
-          var opt = document.createElement("option");
-          opt.value = String(year);
-          opt.textContent = year + "年";
-          dateYear.appendChild(opt);
-        }
-      }
-
-      function populateMonths() {
-        dateMonth.innerHTML = "";
-        for (var m = 1; m <= 12; m++) {
-          var opt = document.createElement("option");
-          var value = String(m).padStart(2, "0");
-          opt.value = value;
-          opt.textContent = m + "月";
-          dateMonth.appendChild(opt);
-        }
-      }
-
-      function populateDays() {
-        var year = Number(dateYear.value);
-        var month = Number(dateMonth.value);
-        var maxDay = daysInMonth(year, month);
-        var prevDay = Number(dateDay.value) || 1;
-        dateDay.innerHTML = "";
-        for (var d = 1; d <= maxDay; d++) {
-          var opt = document.createElement("option");
-          var value = String(d).padStart(2, "0");
-          opt.value = value;
-          opt.textContent = d + "日";
-          dateDay.appendChild(opt);
-        }
-        dateDay.value = String(Math.min(prevDay, maxDay)).padStart(2, "0");
-      }
-
-      function populateTime() {
-        timeHour.innerHTML = "";
-        for (var h = 0; h < 24; h++) {
-          var hourOpt = document.createElement("option");
-          var hourValue = String(h).padStart(2, "0");
-          hourOpt.value = hourValue;
-          hourOpt.textContent = hourValue + "时";
-          timeHour.appendChild(hourOpt);
-        }
-
-        timeMinute.innerHTML = "";
-        for (var min = 0; min < 60; min++) {
-          var minOpt = document.createElement("option");
-          var minValue = String(min).padStart(2, "0");
-          minOpt.value = minValue;
-          minOpt.textContent = minValue + "分";
-          timeMinute.appendChild(minOpt);
-        }
-      }
-
-      function setPickerDate(d) {
-        dateYear.value = String(d.getFullYear());
-        dateMonth.value = String(d.getMonth() + 1).padStart(2, "0");
-        populateDays();
-        dateDay.value = String(d.getDate()).padStart(2, "0");
-      }
-
-      function ensureMinDate() {
-        var todayStr = formatDateInput(new Date());
-        if (getDateValue() < todayStr) {
-          setPickerDate(parseDate(todayStr));
-        }
-      }
-
       function updateDateFeedback() {
-        var value = getDateValue();
-        if (!value) {
+        if (!dateInput.value) {
           dateFeedback.textContent = "";
           return;
         }
-        var d = parseDate(value);
+        var d = parseDate(dateInput.value);
         dateFeedback.textContent =
           "已选：" + (d.getMonth() + 1) + "月" + d.getDate() + "日 " + WEEKDAYS[d.getDay()];
       }
 
       function updateTimeFeedback() {
-        var value = getTimeValue();
-        timeFeedback.textContent = value ? "已选：" + value : "";
-      }
-
-      function syncDateState() {
-        ensureMinDate();
-        state.date = getDateValue();
-        updateDateFeedback();
-      }
-
-      function syncTimeState() {
-        state.time = getTimeValue();
-        updateTimeFeedback();
+        timeFeedback.textContent = timeInput.value ? "已选：" + timeInput.value : "";
       }
 
       function initDateField() {
-        populateYears();
-        populateMonths();
-        populateTime();
-        setPickerDate(tomorrow());
-        timeHour.value = "17";
-        timeMinute.value = "00";
-        state.date = getDateValue();
-        state.time = getTimeValue();
+        var tmr = tomorrow();
+        var todayStr = formatDateInput(new Date());
+        dateInput.min = todayStr;
+        dateInput.value = formatDateInput(tmr);
+        state.date = dateInput.value;
         updateDateFeedback();
         updateTimeFeedback();
       }
@@ -1025,25 +915,19 @@
       btnNo.addEventListener("click", onNoClick);
       window.addEventListener("resize", onResize);
 
-      dateYear.addEventListener("change", function () {
-        populateDays();
-        syncDateState();
-      });
-      dateMonth.addEventListener("change", function () {
-        populateDays();
-        syncDateState();
-      });
-      dateDay.addEventListener("change", syncDateState);
-      timeHour.addEventListener("change", syncTimeState);
-      timeMinute.addEventListener("change", syncTimeState);
+      dateInput.addEventListener("change", updateDateFeedback);
+      timeInput.addEventListener("change", updateTimeFeedback);
 
       document.getElementById("btn-to-date").addEventListener("click", function () {
         showScreen("screen-3");
       });
 
       document.getElementById("btn-to-menu").addEventListener("click", function () {
-        syncDateState();
-        syncTimeState();
+        if (dateInput.value < dateInput.min) dateInput.value = dateInput.min;
+        state.date = dateInput.value;
+        state.time = timeInput.value || "17:00";
+        updateDateFeedback();
+        updateTimeFeedback();
         showScreen("screen-4");
       });
 
